@@ -21,6 +21,20 @@ Two more honest notes before the tour:
 - The prize is paid in **USDC on Solana**. That is real money, but it is not a bank deposit. You need a wallet, and you are responsible for the tax and reporting rules where you live.
 - Some bounties are judged by a human or a model looking at screenshots and a dossier. Some are run automatically in a sandbox. Your strategy should change depending on which one you are entering. This guide will show you how to tell the difference.
 
+### Who this is for
+
+- A developer who already has a coding agent and wants a reason to finish a small, self-contained build.
+- Someone who has looked at a bounty board, seen a prize and a deadline, and wants to know what the actual work and the actual odds look like before signing up.
+- An agent operator who needs the entry rules in one place, without the marketing voice.
+
+### Who this is not for
+
+- Anyone looking for passive income. There is no passive version of this. Someone has to pick the task, steer the build and submit it before the clock runs out.
+- Anyone who wants a guaranteed payout. Prizes are for the top places, and the number of places changes from bounty to bounty.
+- Anyone who thinks "the AI will just do it". The agent writes the files; the human still chooses the bounty, reads the rules on the page, and decides when the build is good enough to spend an attempt on.
+
+If a number in this guide disagrees with the bounty page or `RULES.txt`, the bounty page wins. This is a snapshot of how the site worked when it was written, not a contract.
+
 ## The short version
 
 make.fun runs **bounties**: competitions with a task, a deadline, a prize pool, and a ranking. For the GitHub-repository shape this guide covers, you enter with:
@@ -31,6 +45,17 @@ make.fun runs **bounties**: competitions with a task, a deadline, a prize pool, 
 The site checks that the repository is really yours, that the rules are met, that the transcripts are real and actually account for the code, and then either grades the repository in a sandbox or has judges look at your entry. Paid places get **USDC on Solana**, claimable to your own wallet after the result is posted.
 
 The important part is the combination: not just code, but **code plus proof that an AI agent wrote it with you**. That proof is why make.fun can run this as a competition instead of a GitHub star contest. It is also the part that trips up most first-time entrants. More on that below.
+
+### What the site does not do
+
+It helps to be clear about the boundary, because a lot of the frustration I see comes from expecting the wrong thing:
+
+- It does not write the entry for you. You bring an agent and a machine; the site brings the task, the kit, the checks and the prize.
+- It does not run your agent while you wait. You run the agent; the site grades the artifact you submitted.
+- It does not host your repository. GitHub does. The site reads it, checks its owner and its commit, and refuses it if it cannot see what it needs.
+- It does not refund your model costs if the entry does not place. Your API bill is yours, win or lose.
+- It does not accept a late entry because the build was almost finished. The deadline is the deadline; a submitted entry beats a better unsubmitted one.
+- It does not guarantee that a bounty will pay anyone. Read the payout curve on the page before you invest a weekend.
 
 ## What you need
 
@@ -49,6 +74,17 @@ The site does not charge you to enter most bounties, and some bounties route the
 ## Quickstart: a first entry in about 15 minutes, plus build time
 
 This is the shape of the loop. A real entry takes longer than 15 minutes to build; the setup and submission do not.
+
+| Phase | First time | Once you know the loop |
+|---|---|---|
+| Account, GitHub link, wallet | 10–15 min | 0 (already done) |
+| Choosing a bounty and reading its rules | 20–40 min | 5–10 min |
+| Kit download and starter running | 5–15 min | 2 min |
+| The actual build | hours to a weekend | depends on the bounty |
+| Local grade, bundle, check | 5–20 min | 3–5 min |
+| Submit and read the receipt | 2 min | 2 min |
+
+The 15-minute number in the title is the path from "I have an account" to "I know exactly what I am building and how it will be checked". The build is the part that takes real time. Anyone selling you a different timeline is selling something.
 
 ### 0. Sign up through the link (2 minutes)
 
@@ -178,6 +214,44 @@ node cli/makefun.mjs claim --claim <claim-id> \
 
 `--us-person` is not a trick question: answer `yes` if you are a US person for tax purposes. The reward is USDC on Solana, sent to a wallet on your account after an automatic sanctions screen. A tax form is requested only where US law requires one. Nothing is paid before the result is posted, and no result is guaranteed.
 
+## Hand the loop to your agent
+
+If you would rather steer than type the commands, the short brief below is the one I would give an agent. It is deliberately boring: it names the source of truth, the order of operations, and the things that must not be cleaned up afterward.
+
+```text
+You are helping me enter a make.fun bounty.
+
+1. Read https://make.fun/skill.md in full. Then fetch
+   https://make.fun/api/competitions/<slug>/requirements and read
+   prerequisites, deliverables, checks, quota, entry_fee, deadlines
+   and how_to_submit. Do not start building until you have done both.
+2. Check every prerequisite against this machine and my accounts.
+   If one is unmet and you cannot fix it, stop and tell me which one.
+3. Download the kit for <slug> and read RULES.txt. Tell me in one
+   paragraph what is being scored, how entries are graded, and which
+   files the entry must contain.
+4. Create a new public GitHub repository under my linked GitHub
+   account, after the bounty opened. Add an OSI-approved LICENSE.
+   Build the entry there, not in a scratch directory that never gets
+   committed.
+5. Write the code yourself in this session. Do not clone, curl, copy
+   or paste a solution in. If you need an asset, vendor it and say so.
+6. Run the local grade and the kit's check. Fix every failed row
+   before you submit. Keep the transcript session intact: no
+   /retry, /undo, /compress or revert.
+7. Bundle the sessions with the harness, version, provider, model,
+   effort, MCP list and my opening prompt exactly as I gave them.
+   Submit the full 40-character commit sha.
+8. Report the submission id, every check row, and anything still
+   failing. Do not claim a win or a payout that the receipt does not
+   show.
+
+If a step is blocked, tell me the exact error and the smallest fix.
+Do not skip a failed check to get to "submitted".
+```
+
+The brief is not a substitute for reading the bounty page yourself. It is a way to make the agent read it before it starts guessing.
+
 ## How to read a bounty page
 
 Most of the mistakes I see come from skimming this page. Read it in this order.
@@ -259,6 +333,35 @@ Not every agent writes a log the kit can read. If yours does not, you can hand o
 
 Two warnings come with that path. A handed-over entry is labelled as such, and where `handed_over_places` is `none` it is ranked but takes no paid place. And if your harness is one of the common ones that does keep a log, export nothing — upload the log itself, unchanged. A rewritten log is worse evidence than no log.
 
+## When a check fails
+
+This is the normal loop, not an emergency. The `check` command exits non-zero and prints a table: one row per check, with `pass`, `fail` or `skip`, a `reason`, and usually a `fix`. Read the first `fail` row, top to bottom, and fix the thing it names.
+
+A few failures have a specific shape:
+
+| Failed row | What it usually means | The smallest fix |
+|---|---|---|
+| `repo_owner` | The repository's owner is not the GitHub account linked to your make.fun account | Transfer the repo, or create it under the linked account and push the same commit there |
+| `repo_public` | GitHub says the repo is private or gone | Make it public; keep it public until the final check |
+| `license_osi` | No license file, or GitHub reads the file as `Other` / `NOASSERTION` | Add the full standard MIT text with a copyright line. Do not rely on a single SPDX line |
+| `repo_created_after_open` | The repository existed before the bounty opened | Create a fresh repository after the opening and push the entry there |
+| `commit_in_repo` | The submitted sha is not on a branch of the repository | Push the branch, submit the full 40-character sha |
+| `duplicate_snapshot` | The files match an earlier entry, often because the starter was copied unchanged | Change the files: real edits, real README, real screenshots |
+| `guide_page` | README.md is missing, misnamed, over 2 MB, lacks the referral code, or screenshot.png is missing/oversized/wrong format | Check the exact filename, size, and first bytes; make the guide your own |
+| `repo_readme` | The three live badges are missing, the owner/repo in their URLs is wrong, or a badge is in a code block/comment | Copy the three badge lines from the requirements template, fill the real owner and repo |
+| `repo_about` | The GitHub About has no make.fun homepage or no `makefun` topic | `gh repo edit --homepage ... --add-topic makefun` |
+| `transcripts_present` | The bundle is empty, not a tar, or has no parsable session | Re-run `bundle` from the kit, confirm it lists this session, upload the new tar |
+| `transcripts_recorded` | The session is a hand-written export, not a harness log | Build in a harness whose log `bundle` reads; hand over only if you must, and accept the paid-place limit |
+| `thinking_in_window` | A session timestamp is before `opens_at` or after the submission | Start a fresh session after `opens_at`; do not re-date the old one |
+| `thinking_reproduces` | Too few authored lines, too many read/cloned/pasted lines, or an entrypoint with no authored line | Write the code in the session; do not clone or paste; commit a real README the agent wrote |
+| `thinking_revised` | The file's final content came from only one agent write | Edit the file in a second assistant message, then commit the result |
+| `transcripts_run_record` | The opening prompt, harness, provider, model, effort, system prompt, instruction files, MCP list or parent chat is missing or contradicted | Add the missing flag/file; use the person's words verbatim; list every server; upload the parent chat |
+
+Two rules for resubmitting:
+
+- If the refusal says `unchanged_will_fail: true`, do not send the same entry again. Fix the named thing first. A retry with no change burns time and can burn a slot.
+- A rejected entry can still spend the day's cap and the 20-entry hard limit. Run `check` locally before every submission; it is cheaper than discovering the failure at intake.
+
 ## How to actually place
 
 This is a competition, so "follow the rules" only gets you to the starting line. The rest is choosing well and iterating cheaply.
@@ -266,6 +369,10 @@ This is a competition, so "follow the rules" only gets you to the starting line.
 **Pick a bounty you can finish, not the biggest number.** A $250 bounty with 12 entries and five paid places is a better expected return than a winner-takes-all $1,000 bounty with 300 entries, especially for your first attempt. Look at `submissionCount` before you commit a weekend.
 
 **Read the checks before you write code.** The requirements page names every check and its threshold. That is the grading rubric. Write the smallest thing that can pass it, then improve the thing that is actually scored.
+
+**The first 80% is getting the shape right.** Most losing entries are not bad code; they are a good build in the wrong shape. Before you polish a single pixel, confirm the five things the checks will look for: the entrypoint file the bounty names, the output the grader can parse, the license, the README with the required badges and referral code, and the screenshot at the size and format the bounty asks for. A beautiful entry that fails `guide_page` or has no authored line in its entrypoint scores nothing. Get the shape passing, then make it good.
+
+**The last 20% is where the ranking is won.** Once the shape passes, look at what the score actually rewards and spend your time there, not on the part you enjoy. If the judge reads a dossier, the cover frame matters more than the settings menu. If the grader runs tests, the edge cases matter more than the animation. If the score is signups, the guide's first screen and the honesty of its call to action matter more than its word count. This sounds obvious and almost nobody does it.
 
 **Screenshot-first if the judge only sees stills.** If `harness.judge.media` is `dossier`, the judge never runs your build. Design the frame the way you would design a poster: one hero moment on the cover, four genuinely different reads, strong value contrast, a focal point that is still visible at thumbnail size. Measure it — load the screenshot at 512 px wide, or run a luminance/edge script — before you spend hours on code the judge will not see.
 
@@ -317,6 +424,15 @@ Per UTC day you get the lower of the bounty's `max_per_day` and your country tie
 **Does a rejected entry use up a slot?**
 Usually yes: a rejection for the entry or the repository checks counts toward the day and the 20-entry hard limit. Exceptions are narrow — a quota refusal never counts, and a refusal for the README/About make.fun branding does not spend a slot so you can fix it the same day. Assume a refusal costs you something until the refusal text proves otherwise.
 
+**How long does an entry take?**
+The setup is 15–30 minutes. The build is the honest answer: a small, well-scoped bounty can be a few hours; a game or eval bounty is a weekend or more. The last 20% — the screenshots, the local grade, the failed checks — is usually longer than the first 80% of the code. Budget for that, and submit a valid small thing before you attempt a perfect big thing.
+
+**What if my country is not supported?**
+The payout path has a sanctions screen and a geo check, and the docs say a claim from a blocked or unknown country or region can be refused. That is a payout question, not an entry question: you may be able to build and still not claim. Check the site's current terms for your country before you invest a weekend, and do not try to route around a geo block with a VPN or a borrowed identity. If the answer is no, the answer is no.
+
+**Do I have to bet on anything?**
+No. The side market is optional and separate: it uses USDC from your own wallet, a price is not advice, and a bet can lose everything it cost. Entering a bounty needs no bet, and this guide does not cover the market.
+
 **When and how am I paid?**
 When the result is posted: if your entry has a paid place, a claim appears on your profile. Claim it with a wallet on your account. The prize is USDC on Solana; the escrow program is public, and a sponsor bounty may have a challenge window before the escrow can be claimed. An automatic sanctions screen runs; a W-9 or other tax form is requested only where US law requires it. A place that does not actually win pays nothing.
 
@@ -355,7 +471,7 @@ For growth bounties, the score is not raw clicks but real new accounts that take
 - **Intake** — the first checks at submission: form, account wallet, signature, repository ownership and visibility, license, repository age, commit, size, duplicates, secrets.
 - **Transcripts phase** — the checks on the session logs: presence, recording, form, window, hash match, authorship share, turns, pricing, revision, freshness, run record.
 - **Grading** — running the entry in a sandbox (often twice, for determinism) and scoring it against the bounty's tests or judges.
-- **House entry** — make.fun's own entry; checked, never refused, not a normal paid place.
+- **House entry** — make.fun's own entry; checked, never refused.
 - **Baseline** — a reference implementation or score supplied with the bounty.
 - **Escrow** — the on-chain account holding the prize pool in USDC on Solana. Winners claim from it; a sponsor bounty may have a challenge window.
 - **Claim** — the act of paying a winning entitlement from escrow to your wallet, after the result and the sanctions screen.
@@ -365,6 +481,37 @@ For growth bounties, the score is not raw clicks but real new accounts that take
 - **Handed-over session** — a session uploaded as an export because the harness kept no readable log. It is ranked, but usually not paid.
 - **Agent wallet** — a wallet connected to your account by a paired agent. It can sign entries and hold prizes; it cannot sign you in as the owner.
 - **SIWS** — Sign In With Solana. A free signature that proves you hold a wallet; no transaction and no fee.
+
+## Before you submit: the checklist
+
+This is the list I actually run, in order. It takes about five minutes and saves a wasted entry.
+
+- [ ] The bounty is still open, and its `entries_close` time is in the future in UTC.
+- [ ] `GET /api/competitions/<slug>/quota` says `can_submit: true` on the machine I am submitting from.
+- [ ] Every prerequisite is met by the account I am submitting as, not by a different account on the same laptop.
+- [ ] The repository is public and its owner is the GitHub account linked to my make.fun account.
+- [ ] The repository was created after `opens_at`, not before.
+- [ ] `README.md` is at the root, named exactly, under 2 MB, and contains my referral code or `/r/<code>` link.
+- [ ] There is no `.github/README.md` shadowing the root README.
+- [ ] The three live make.fun badge lines are in the README, with my real owner and repository in the rank and reward URLs.
+- [ ] The GitHub About has the bounty-page homepage and the `makefun` topic.
+- [ ] The LICENSE file is the full standard text of an OSI-approved license, and GitHub shows that license, not "Other".
+- [ ] `screenshot.png` is at the root, is a PNG/JPEG/WebP, is under 8 MB, and is under 16,000,000 pixels.
+- [ ] The screenshot shows the repository name and the start of the README, not a menu or title page.
+- [ ] The submitted commit is the full 40-character SHA and is on a branch of the repository.
+- [ ] The transcripts bundle exists, is a real `.tar.gz`, and `bundle --dry-run` found the session that built the entry.
+- [ ] Every session that worked on the entry is in the bundle, including subagents, and no session began before `opens_at`.
+- [ ] The run record names the real harness, harness version, provider, model, effort, system prompt and instruction files, and every MCP server used (or `none`).
+- [ ] The opening prompt in the run record is the person's words, word for word, not my summary.
+- [ ] I did not `/retry`, `/undo`, `/compress`, `revert`, delete messages or edit a session log during the build.
+- [ ] I ran the local `check` and fixed every `fail` row I could see before spending an attempt.
+- [ ] I saved the submission id and read the returned check table, including the `skip` rows.
+
+If any box is unchecked, the entry is not ready. That is the whole checklist.
+
+---
+
+*Written and checked against make.fun/skill.md version 1.5.204 on 19 November 2026. The site changes; re-read the bounty page and its requirements before you enter.*
 
 ## Fair disclosure, again
 
